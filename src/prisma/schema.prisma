@@ -1,0 +1,68 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id @default(uuid()) @map("id")
+  name        String   @map("name")
+  email       String   @unique @map("email")
+  password    String   @map("password")
+
+  birthdays   Birthday[]
+  devices     Device[]
+
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Birthday {
+  id            String   @id @default(uuid()) @map("id")
+
+  name          String   @map("name")
+
+  dateOfBirth   DateTime @map("date_of_birth")
+
+  reminderDays  Int      @default(1) @map("reminder_days") // days before
+  reminderTime  String?  @map("reminder_time") // "09:00"
+
+  notes         String?  @map("notes")
+  relationship  String?  @map("relationship") // friend, family, work
+
+  userId        String   @map("user_id")
+  user          User     @relation(fields: [userId], references: [id])
+
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([dateOfBirth])
+  @@map("birthdays")
+}
+
+model Device {
+  id          String   @id @default(uuid()) @map("id")
+
+  fcmToken    String   @unique @map("fcm_token")
+
+  platform    String   @map("platform") // android / ios
+  deviceName  String?  @map("device_name")
+
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@map("devices")
+}
